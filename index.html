@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>
+    SPATIAL-TEMPORAL MONITORING AND ANALYSIS OF RAILWAY INDUCED NOISE AND VIBRATION IMPACTS IN ILALA DISTRICT, TANZANIA:
+    A GIS AND REMOTE SENSING INTEGRATED APPROACH
+  </title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.115/Build/Cesium/Widgets/widgets.css" rel="stylesheet" />
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1e1e1e; color: #fff; }
+    
+    /* Header */
+    header { 
+      background: linear-gradient(135deg, #001a4d 0%, #003366 100%);
+      color: white; 
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    header h2 { font-size: 16px; font-weight: 600; }
+    header p { font-size: 12px; opacity: 0.9; margin: 4px 0 0 0; }
+    .header-title { flex: 1; }
+    .header-nav { display: flex; gap: 20px; align-items: center; }
+    .header-nav a { color: white; text-decoration: none; font-size: 13px; cursor: pointer; }
+    .header-nav a:hover { opacity: 0.8; }
+    .user-icon { display: flex; align-items: center; gap: 8px; }
+    
+    /* Container */
+    #container { display: flex; height: calc(100vh - 80px); }
+    
+    /* Sidebar */
+    #sidebar { 
+      width: 290px; 
+      background: #2a2d33;
+      color: #e0e0e0;
+      padding: 15px;
+      overflow-y: auto;
+      border-right: 1px solid #3a3f47;
+    }
+    #sidebar h3 { 
+      font-size: 14px; 
+      font-weight: 600;
+      margin: 18px 0 10px 0;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+    
+    /* Layer Group */
+    .layer-section { margin-bottom: 8px; }
+    .layer-section-title { 
+      display: flex; 
+      align-items: center; 
+      gap: 8px;
+      padding: 8px;
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: 13px;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+    .layer-section-title:hover { background: rgba(255,255,255,0.1); }
+    .layer-section-title .expand-icon { 
+      font-size: 18px;
+      display: inline-block;
+      transition: transform 0.2s;
+    }
+    .layer-section.collapsed .expand-icon { transform: rotate(-90deg); }
+    .layer-items { 
+      margin-left: 12px;
+      max-height: 500px;
+      overflow: hidden;
+      transition: max-height 0.3s;
+    }
+    .layer-section.collapsed .layer-items { max-height: 0; }
+    
+    .layer-item { 
+      display: flex; 
+      align-items: center; 
+      gap: 8px;
+      padding: 6px 8px;
+      font-size: 12px;
+      cursor: pointer;
+      border-radius: 3px;
+      transition: background 0.2s;
+    }
+    .layer-item:hover { background: rgba(255,255,255,0.08); }
+    .layer-item input[type="checkbox"] { cursor: pointer; }
+    .layer-icon { 
+      width: 14px; 
+      height: 14px;
+      border-radius: 2px;
+      display: inline-block;
+    }
+    
+    /* Content */
+    #content { 
+      flex: 1; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 5px;
+      padding: 10px;
+    }
+    
+    .content-section {
+      flex: 1;
+      border: 1px solid #3a3f47;
+      border-radius: 4px;
+      background: #1a1a1a;
+      position: relative;
+      overflow: hidden;
+      /* FIX: Turn section into flex container so children can fill height */
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .content-header {
+      background: #2a2d33;
+      padding: 10px 15px;
+      border-bottom: 1px solid #3a3f47;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    
+    .content-header .icons { display: flex; gap: 10px; }
+    .content-header .icons span { cursor: pointer; font-size: 18px; }
+    
+    /* Scrollbar */
+    #sidebar::-webkit-scrollbar { width: 6px; }
+    #sidebar::-webkit-scrollbar-track { background: #2a2d33; }
+    #sidebar::-webkit-scrollbar-thumb { background: #555; border-radius: 3px; }
+    #sidebar::-webkit-scrollbar-thumb:hover { background: #666; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-title">
+      <h2>SPATIAL-TEMPORAL MONITORING AND ANALYSIS OF RAILWAY INDUCED NOISE AND VIBRATION IMPACTS IN ILALA DISTRICT, TANZANIA</h2>
+      <p>A GIS and Remote Sensing Integrated Approach</p>
+    </div>
+    <div class="header-nav">
+      <a href="#dashboard">Dashboard</a>
+      <a href="#reports">Reports</a>
+      <a href="#tools">Tools</a>
+      <div class="user-icon">
+        <span class="material-symbols-outlined">account_circle</span>
+        <a href="#user">User</a>
+      </div>
+    </div>
+  </header>
+
+  <div id="container">
+    <div id="sidebar">
+      <!-- 2D MODEL MAPS SECTION -->
+<div class="layer-section">
+  <div class="layer-section-title" onclick="toggleSection(this)">
+    <span class="material-symbols-outlined expand-icon">expand_more</span>
+    <span class="material-symbols-outlined" style="font-size: 18px;">map</span>
+    <span>2D Model Maps</span>
+  </div>
+  <div class="layer-items">
+    
+    <!-- PASSENGER TRAIN -->
+    <div class="layer-section" style="margin-left: 0;">
+      <div class="layer-section-title" onclick="toggleSection(this)">
+        <span class="material-symbols-outlined expand-icon">expand_more</span>
+        <span class="material-symbols-outlined" style="font-size: 16px;">train</span>
+        <span>Passenger Train</span>
+      </div>
+      <div class="layer-items">
+        
+        <!-- Passenger Noise -->
+        <div class="layer-section">
+          <div class="layer-section-title" onclick="toggleSection(this)">
+            <span class="material-symbols-outlined expand-icon">expand_more</span>
+            <span class="material-symbols-outlined" style="font-size: 16px;">volume_up</span>
+            <span>Passenger Noise</span>
+          </div>
+          <div class="layer-items">
+            <div class="layer-item">
+              <input type="radio" name="mapLayer" value="images/MAPS/JAN TO MAY PASSENGER HEADING.png" onchange="update2DMap(this)" />
+              <span class="layer-icon" style="background: #FFEB3B;"></span>January
+            </div>
+            <div class="layer-item">
+              <input type="radio" name="mapLayer" value="images/MAPS/JAN TO MAY PASSENGER HEADING.png" onchange="update2DMap(this)" />
+              <span class="layer-icon" style="background: #FFEB3B;"></span>February
+            </div>
+            <div class="layer-item">
+              <input type="radio" name="mapLayer" value="images/MAPS/JAN TO MAY PASSENGER HEADING.png" onchange="update2DMap(this)" />
+              <span class="layer-icon" style="background: #FFEB3B;"></span>March
+            </div>
+            <div class="layer-item">
+              <input type="radio" name="mapLayer" value="images/MAPS/april to may.png" onchange="update2DMap(this)" />
+              <span class="layer-icon" style="background: #FFEB3B;"></span>April
+            </div>
+            <div class="layer-item">
+              <input type="radio" name="mapLayer" value="images/MAPS/april to may.png" onchange="update2DMap(this)" />
+              <span class="layer-icon" style="background: #FFEB3B;"></span>May
+            </div>
+          </div>
+        </div>
+
+        <!-- Passenger Vibration -->
+        <div class="layer-section">
+          <div class="layer-section-title" onclick="toggleSection(this)">
+            <span class="material-symbols-outlined expand-icon">expand_more</span>
+            <span class="material-symbols-outlined" style="font-size: 16px;">vibration</span>
+            <span>Passenger Vibration</span>
+          </div>
+          <div class="layer-items">
+            <div class="layer-item">
+              <input type="radio" name="mapLayer" value="images/MAPS/VIBRATION PASSENGER JAN,FEB,MARCH.png" onchange="update2DMap(this)" />
+              <span class="layer-icon" style="background: #FFEB3B;"></span>January
+            </div>
+            <div class="layer-item">
+              <input type="radio" name="mapLayer" value="images/MAPS/VIBRATION PASSENGER JAN,FEB,MARCH.png" onchange="update2DMap(this)" />
+              <span class="layer-icon" style="background: #FFEB3B;"></span>February
+            </div>
+            <div class="layer-item">
+              <input type="radio" name="mapLayer" value="images/MAPS/VIBRATION PASSENGER JAN,FEB,MARCH.png" onchange="update2DMap(this)" />
+              <span class="layer-icon" style="background: #FFEB3B;"></span>March
+            </div>
+            <div class="layer-item">
+              <input type="radio" name="mapLayer" value="images/MAPS/VIBRATION PASSENGER APRIL,MAY.png" onchange="update2DMap(this)" />
+              <span class="layer-icon" style="background: #FFEB3B;"></span>April
+            </div>
+            <div class="layer-item">
+              <input type="radio" name="mapLayer" value="images/MAPS/VIBRATION PASSENGER APRIL,MAY.png" onchange="update2DMap(this)" />
+              <span class="layer-icon" style="background: #FFEB3B;"></span>May
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- FREIGHT TRAIN -->
+    <div class="layer-section" style="margin-left: 0;">
+      <div class="layer-section-title" onclick="toggleSection(this)">
+        <span class="material-symbols-outlined expand-icon">expand_more</span>
+        <span class="material-symbols-outlined" style="font-size: 16px;">local_shipping</span>
+        <span>Freight Train</span>
+      </div>
+      <div class="layer-items">
+        
+        <!-- Freight Noise -->
+        <div class="layer-section">
+          <div class="layer-section-title" onclick="toggleSection(this)">
+            <span class="material-symbols-outlined expand-icon">expand_more</span>
+            <span class="material-symbols-outlined" style="font-size: 16px;">volume_up</span>
+            <span>Freight Noise</span>
+          </div>
+          <div class="layer-items">
+            <div class="layer-item">
+              <input type="radio" name="mapLayer" value="images/MAPS/FREIGHT JAN,FEB,MARCH.png" onchange="update2DMap(this)" />
+              <span class="layer-icon" style="background: #4CAF50;"></span>January
+            </div>
+            <div class="layer-item">
+              <input type="radio" name="mapLayer" value="images/MAPS/FREIGHT JAN,FEB,MARCH.png" onchange="update2DMap(this)" />
+              <span class="layer-icon" style="background: #4CAF50;"></span>February
+            </div>
+            <div class="layer-item">
+              <input type="radio" name="mapLayer" value="images/MAPS/FREIGHT JAN,FEB,MARCH.png" onchange="update2DMap(this)" />
+              <span class="layer-icon" style="background: #4CAF50;"></span>March
+            </div>
+            <div class="layer-item">
+              <input type="radio" name="mapLayer" value="images/MAPS/FREIGHT APRIL,MAY.png" onchange="update2DMap(this)" />
+              <span class="layer-icon" style="background: #4CAF50;"></span>April
+            </div>
+            <div class="layer-item">
+              <input type="radio" name="mapLayer" value="images/MAPS/FREIGHT APRIL,MAY.png" onchange="update2DMap(this)" />
+              <span class="layer-icon" style="background: #4CAF50;"></span>May
+            </div>
+          </div>
+        </div>
+
+        <!-- Freight Vibration -->
+        <div class="layer-section">
+          <div class="layer-section-title" onclick="toggleSection(this)">
+            <span class="material-symbols-outlined expand-icon">expand_more</span>
+            <span class="material-symbols-outlined" style="font-size: 16px;">vibration</span>
+            <span>Freight Vibration</span>
+          </div>
+          <div class="layer-items">
+            <div class="layer-item">
+              <input type="radio" name="mapLayer" value="images/MAPS/VIBRATION FREIGHT JAN,FEB,MARCH.png" onchange="update2DMap(this)" />
+              <span class="layer-icon" style="background: #4CAF50;"></span>January
+            </div>
+            <div class="layer-item">
+              <input type="radio" name="mapLayer" value="images/MAPS/VIBRATION FREIGHT JAN,FEB,MARCH.png" onchange="update2DMap(this)" />
+              <span class="layer-icon" style="background: #4CAF50;"></span>February
+            </div>
+            <div class="layer-item">
+              <input type="radio" name="mapLayer" value="images/MAPS/VIBRATION FREIGHT JAN,FEB,MARCH.png" onchange="update2DMap(this)" />
+              <span class="layer-icon" style="background: #4CAF50;"></span>March
+            </div>
+            <div class="layer-item">
+              <input type="radio" name="mapLayer" value="images/MAPS/VIBRATION FREIGHT APRIL,MAY.png" onchange="update2DMap(this)" />
+              <span class="layer-icon" style="background: #4CAF50;"></span>April
+            </div>
+            <div class="layer-item">
+              <input type="radio" name="mapLayer" value="images/MAPS/VIBRATION FREIGHT APRIL,MAY.png" onchange="update2DMap(this)" />
+              <span class="layer-icon" style="background: #4CAF50;"></span>May
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Analysis -->
+    <div class="layer-item">
+      <span class="material-symbols-outlined" style="font-size: 16px;">analytics</span>
+      <span>Analysis</span>
+    </div>
+
+  </div>
+</div>
+      <h3><span class="material-symbols-outlined">layers</span> Layers</h3>
+      
+      <div class="layer-section">
+        <div class="layer-section-title" onclick="toggleSection(this)">
+          <span class="material-symbols-outlined expand-icon">expand_more</span>
+          <span class="material-symbols-outlined" style="font-size: 18px;">map</span>
+          <span>2D Model Maps</span>
+        </div>
+        <div class="layer-items">
+          
+          <div class="layer-section" style="margin-left: 0;">
+            <div class="layer-section-title" onclick="toggleSection(this)">
+              <span class="material-symbols-outlined expand-icon">expand_more</span>
+              <span class="material-symbols-outlined" style="font-size: 16px;">train</span>
+              <span>Passenger Train</span>
+            </div>
+            <div class="layer-items">
+              <div class="layer-section">
+                <div class="layer-section-title" onclick="toggleSection(this)">
+                  <span class="material-symbols-outlined expand-icon">expand_more</span>
+                  <span class="material-symbols-outlined" style="font-size: 16px;">volume_up</span>
+                  <span>Passenger Noise</span>
+                </div>
+                <div class="layer-items">
+                  <div class="layer-item"><input type="checkbox" /><span class="layer-icon" style="background: #FFEB3B;"></span>January</div>
+                  <div class="layer-item"><input type="checkbox" /><span class="layer-icon" style="background: #FFEB3B;"></span>February</div>
+                  <div class="layer-item"><input type="checkbox" /><span class="layer-icon" style="background: #FFEB3B;"></span>March</div>
+                  <div class="layer-item"><input type="checkbox" /><span class="layer-icon" style="background: #FFEB3B;"></span>April</div>
+                  <div class="layer-item"><input type="checkbox" /><span class="layer-icon" style="background: #FFEB3B;"></span>May</div>
+                </div>
+              </div>
+              <div class="layer-section">
+                <div class="layer-section-title" onclick="toggleSection(this)">
+                  <span class="material-symbols-outlined expand-icon">expand_more</span>
+                  <span class="material-symbols-outlined" style="font-size: 16px;">vibration</span>
+                  <span>Passenger Vibration</span>
+                </div>
+                <div class="layer-items">
+                  <div class="layer-item"><input type="checkbox" /><span class="layer-icon" style="background: #FFEB3B;"></span>January</div>
+                  <div class="layer-item"><input type="checkbox" /><span class="layer-icon" style="background: #FFEB3B;"></span>February</div>
+                  <div class="layer-item"><input type="checkbox" /><span class="layer-icon" style="background: #FFEB3B;"></span>March</div>
+                  <div class="layer-item"><input type="checkbox" /><span class="layer-icon" style="background: #FFEB3B;"></span>April</div>
+                  <div class="layer-item"><input type="checkbox" /><span class="layer-icon" style="background: #FFEB3B;"></span>May</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="layer-section" style="margin-left: 0;">
+            <div class="layer-section-title" onclick="toggleSection(this)">
+              <span class="material-symbols-outlined expand-icon">expand_more</span>
+              <span class="material-symbols-outlined" style="font-size: 16px;">local_shipping</span>
+              <span>Freight Train</span>
+            </div>
+            <div class="layer-items">
+              <div class="layer-section">
+                <div class="layer-section-title" onclick="toggleSection(this)">
+                  <span class="material-symbols-outlined expand-icon">expand_more</span>
+                  <span class="material-symbols-outlined" style="font-size: 16px;">volume_up</span>
+                  <span>Freight Noise</span>
+                </div>
+                <div class="layer-items">
+                  <div class="layer-item"><input type="checkbox" /><span class="layer-icon" style="background: #4CAF50;"></span>January</div>
+                  <div class="layer-item"><input type="checkbox" /><span class="layer-icon" style="background: #4CAF50;"></span>February</div>
+                  <div class="layer-item"><input type="checkbox" /><span class="layer-icon" style="background: #4CAF50;"></span>March</div>
+                  <div class="layer-item"><input type="checkbox" /><span class="layer-icon" style="background: #4CAF50;"></span>April</div>
+                  <div class="layer-item"><input type="checkbox" /><span class="layer-icon" style="background: #4CAF50;"></span>May</div>
+                </div>
+              </div>
+              <div class="layer-section">
+                <div class="layer-section-title" onclick="toggleSection(this)">
+                  <span class="material-symbols-outlined expand-icon">expand_more</span>
+                  <span class="material-symbols-outlined" style="font-size: 16px;">vibration</span>
+                  <span>Freight Vibration</span>
+                </div>
+                <div class="layer-items">
+                  <div class="layer-item"><input type="checkbox" /><span class="layer-icon" style="background: #4CAF50;"></span>January</div>
+                  <div class="layer-item"><input type="checkbox" /><span class="layer-icon" style="background: #4CAF50;"></span>February</div>
+                  <div class="layer-item"><input type="checkbox" /><span class="layer-icon" style="background: #4CAF50;"></span>March</div>
+                  <div class="layer-item"><input type="checkbox" /><span class="layer-icon" style="background: #4CAF50;"></span>April</div>
+                  <div class="layer-item"><input type="checkbox" /><span class="layer-icon" style="background: #4CAF50;"></span>May</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="layer-item">
+            <span class="material-symbols-outlined" style="font-size: 16px;">analytics</span>
+            <span>Analysis</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="layer-section">
+        <div class="layer-section-title" onclick="toggleSection(this)">
+          <span class="material-symbols-outlined expand-icon">expand_more</span>
+          <span class="material-symbols-outlined" style="font-size: 18px;">view_in_ar</span>
+          <span>3D Models</span>
+        </div>
+        <div class="layer-items">
+          <div class="layer-item"><input type="checkbox" /><span class="material-symbols-outlined" style="font-size: 16px; color: #4CAF50;">check_circle</span>Passenger Train 3D Model</div>
+          <div class="layer-item"><input type="checkbox" /><span class="material-symbols-outlined" style="font-size: 16px; color: #4CAF50;">check_circle</span>Freight Train 3D Model</div>
+        </div>
+      </div>
+
+      <div class="layer-section">
+        <div class="layer-section-title" onclick="toggleSection(this)">
+          <span class="material-symbols-outlined expand-icon">expand_more</span>
+          <span class="material-symbols-outlined" style="font-size: 18px;">movie</span>
+          <span>3D Simulation Videos</span>
+        </div>
+        <div class="layer-items">
+          <div class="layer-item"><input type="checkbox" /><span class="layer-icon" style="background: #FF9800;"></span>Passenger Train Simulation</div>
+          <div class="layer-item"><input type="checkbox" /><span class="layer-icon" style="background: #FF9800;"></span>Freight Train Simulation</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="content">
+      <div class="content-section">
+        <div class="content-header">
+          <div><span class="material-symbols-outlined" style="font-size: 18px; vertical-align: middle;">map</span> 2D Noise & Vibration Map</div>
+          <div class="icons">
+            <span class="material-symbols-outlined">fullscreen</span>
+            <span class="material-symbols-outlined">more_vert</span>
+          </div>
+        </div>
+        <div id="map2D" style="flex: 1; background-image:url('images/2D Noise & vibration map.jpg'); background-size: cover; background-position: center; background-repeat: no-repeat;"></div>
+      </div>
+      
+      <div style="display: flex; gap: 5px; flex: 1;">
+        <div class="content-section" style="flex: 1;">
+          <div class="content-header">
+            <div><span class="material-symbols-outlined" style="font-size: 18px; vertical-align: middle;">view_in_ar</span> 3D Model View (Cesium)</div>
+            <div class="icons">
+              <span class="material-symbols-outlined">fullscreen</span>
+              <span class="material-symbols-outlined">more_vert</span>
+            </div>
+          </div>
+          <div id="model3D" style="flex: 1; background-image:url('images/3D model.jpg'); background-size: cover; background-position: center; background-repeat: no-repeat;"></div>
+        </div>
+        
+        <div class="content-section" style="flex: 1;">
+          <div class="content-header">
+            <div><span class="material-symbols-outlined" style="font-size: 18px; vertical-align: middle;">movie</span> 3D Noise & Vibration Simulation</div>
+            <div class="icons">
+              <span class="material-symbols-outlined">fullscreen</span>
+              <span class="material-symbols-outlined">more_vert</span>
+            </div>
+          </div>
+          <div id="simulation3D" style="flex: 1; background-image:url('images/3D Noise & Vibration Simulation.jpg'); background-size: cover; background-position: center; background-repeat: no-repeat;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.115/Build/Cesium/Cesium.js"></script>
+
+  <script>
+    // Toggle section expand/collapse
+    function toggleSection(element) {
+      const section = element.closest('.layer-section');
+      section.classList.toggle('collapsed');
+    }
+
+    // Initialize Mapbox
+    mapboxgl.accessToken = 'YOUR_MAPBOX_ACCESS_TOKEN';
+    const map = new mapboxgl.Map({
+      container: 'map2D',
+      style: 'mapbox://styles/mapbox/light-v11',
+      center: [39.2, -6.8], // Dar es Salaam coordinates
+      zoom: 12
+    });
+
+    // Initialize Cesium for 3D Model
+    const viewerModel = new Cesium.Viewer('model3D', {
+      terrainProvider: Cesium.createWorldTerrain(),
+      baseLayerPicker: false,
+      geocoder: false,
+      homeButton: false,
+      sceneModePicker: false,
+      navigationHelpButton: false,
+      infoBox: false,
+      selectionIndicator: false
+    });
+
+    // Initialize Cesium for Simulation
+    const viewerSim = new Cesium.Viewer('simulation3D', {
+      terrainProvider: Cesium.createWorldTerrain(),
+      baseLayerPicker: false,
+      geocoder: false,
+      homeButton: false,
+      sceneModePicker: false,
+      navigationHelpButton: false,
+      infoBox: false,
+      selectionIndicator: false
+    });
+
+    // Slideshow for the 3D Noise & Vibration Simulation panel
+    const simImages = [
+      'images/3D Noise & Vibration Simulation.jpg',
+      'images/3D Noise & Vibration Simulation-2.png'
+    ];
+    let simIndex = 0;
+    const simulationPanel = document.getElementById('simulation3D');
+    setInterval(() => {
+      simIndex = (simIndex + 1) % simImages.length;
+      simulationPanel.style.backgroundImage = `url('${simImages[simIndex]}')`;
+    }, 5500);
+  </script>
+  // Function to update 2D Map when any month is selected
+function update2DMap(element) {
+  const mapPanel = document.getElementById('map2D');
+  if (element.checked) {
+    mapPanel.style.backgroundImage = `url('${element.value}')`;
+  }
+}
+</body>
+</html>
